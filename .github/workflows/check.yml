@@ -13,14 +13,26 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --locked --python 3.12
-      - run: uv run ruff check src tests
-      - run: uv run ruff format --check src tests
+      - run: uv run ruff check src tests packaging
+      - run: uv run ruff format --check src tests packaging
       - run: uv run pytest
       - run: uv build
       - uses: actions/upload-artifact@v4
         with:
           name: python-package-${{ matrix.os }}
           path: dist/*
+      - name: Build Windows executable
+        if: runner.os == 'Windows'
+        run: uv run --group windows-build pyinstaller --noconfirm packaging/GeoPort.spec
+      - name: Check standalone startup
+        if: runner.os == 'Windows'
+        run: uv run python packaging/smoke_windows.py dist/GeoPort.exe
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: GeoPort-Windows-x64
+          path: dist/GeoPort.exe
+          if-no-files-found: error
   browser:
     runs-on: ubuntu-latest
     steps:

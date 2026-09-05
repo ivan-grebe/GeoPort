@@ -6,7 +6,15 @@ This is a development edition of [ivan-grebe/GeoPort](https://github.com/ivan-gr
 
 ## Status
 
-The current target is **iOS 17.4+**, using **pymobiledevice3 11.3.0**. The older custom QUIC/driver paths have been removed. Modern iOS support is a target, not a hardware certification: automated tests use a simulated device. Physical USB/Wi-Fi connections, image mounting, and iOS 27 beta behavior still require testing. Native installers and signed releases have not been produced.
+The current target is **iOS 17.4+**, using **pymobiledevice3 11.3.0**. The older custom QUIC/driver paths have been removed. Modern iOS support is a target, not a hardware certification: automated tests use a simulated device. Physical USB/Wi-Fi connections, image mounting, and iOS 27 beta behavior still require testing. A portable Windows x64 executable is available from successful Windows CI builds. It is unsigned; installers and signed releases have not been produced.
+
+## Windows executable
+
+Download the **GeoPort-Windows-x64** artifact from a successful [Check workflow run](https://github.com/ivan-grebe/GeoPort/actions/workflows/check.yml) on this branch, extract it, and double-click `GeoPort.exe`. Python, Node.js, and a source checkout are not required. Apple Devices or iTunes must still provide Apple's device connectivity services.
+
+GeoPort opens the interface in your default browser. Keep its console window open while using it. To exit normally, press **Ctrl+C in the console**; GeoPort asks the phone to restore GPS before closing. Closing the browser tab alone does not stop the application. A forced process exit cannot guarantee GPS restoration.
+
+The first launch extracts bundled files and may take several seconds. If the default port is occupied, launch `GeoPort.exe --port 0` from a terminal. `--no-browser` and `--version` are also supported.
 
 ## Run from source
 
@@ -66,6 +74,16 @@ uv run ruff check src tests
 uv run ruff format --check src tests
 uv build
 ```
+
+To build the single Windows executable, run on Windows x64 with Python 3.12:
+
+```sh
+uv sync --locked --python 3.12 --group windows-build
+uv run --group windows-build pyinstaller --noconfirm packaging/GeoPort.spec
+uv run python packaging/smoke_windows.py dist/GeoPort.exe
+```
+
+The output is `dist/GeoPort.exe`. The smoke check runs it from a temporary directory with Python-specific environment variables removed and a minimal PATH. It checks startup and bundled web assets without discovering or controlling devices. The recipe uses [PyInstaller's one-file packaging](https://pyinstaller.org/en/stable/spec-files.html).
 
 Browser integration checks need Node.js and Playwright:
 

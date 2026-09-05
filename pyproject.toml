@@ -26,6 +26,9 @@ geoport = "geoport.__main__:main"
 
 [dependency-groups]
 dev = ["pytest>=8", "pytest-asyncio>=1", "ruff>=0.12", "build>=1.2"]
+windows-build = [
+    "pyinstaller>=6.22.2,<7",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -43,5 +46,5 @@ select = ["E", "F", "I", "UP", "B"]
 packages = ["src/geoport"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src/geoport", "/tests", "/docs", "/.github", "/README.md", "/FAQ.md",
+include = ["/src/geoport", "/tests", "/docs", "/packaging", "/.github", "/README.md", "/FAQ.md",
            "/LICENSE", "/pyproject.toml", "/uv.lock", "/package.json", "/package-lock.json"]
