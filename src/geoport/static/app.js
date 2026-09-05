@@ -41,7 +41,7 @@ function updateControls() {
   $('pause').disabled = busy || !(playing || paused);
   $('stop').disabled = busy || !connected || !session.playback;
   $('pause').textContent = paused ? 'Resume' : 'Pause';
-  for (const id of ['draw', 'new-route', 'clear-route', 'add-node', 'undo-node', 'close-route', 'routes', 'import', 'speed', 'finish']) {
+  for (const id of ['draw', 'new-route', 'clear-route', 'undo-node', 'close-route', 'routes', 'import', 'speed', 'finish']) {
     $(id).disabled = busy || playing || paused;
   }
   $('undo-node').disabled ||= !activeRoute()?.points.length;
@@ -339,9 +339,6 @@ $('draw').addEventListener('click', () => {
   renderRoute();
 });
 $('new-route').addEventListener('click', () => { finishDrawing(); newRoute(); });
-$('add-node').addEventListener('click', () => {
-  try { addNode(readPoint()); } catch (error) { notice(error.message, true); }
-});
 $('undo-node').addEventListener('click', () => {
   const route = activeRoute();
   if (!route) return;
