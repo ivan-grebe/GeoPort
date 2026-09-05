@@ -23,7 +23,6 @@
         <div class="button-row"><button id="connect" class="primary" disabled>Connect</button>
           <button id="disconnect" disabled>Disconnect</button></div>
         <p id="device-hint" class="hint">Unlock your iPhone and connect it by USB to pair.</p>
-        <button id="wifi" class="quiet" disabled>Enable Wi-Fi connections</button>
       </section>
       <section aria-labelledby="place-heading">
         <h2 id="place-heading">Location</h2>
@@ -51,7 +50,7 @@
         <label for="finish">On route finish</label>
         <select id="finish"><option value="stop">Stop at the end</option><option value="loop" disabled>Loop connected route forever</option><option value="restart">Restart from beginning forever</option><option value="reverse">Reverse back and forth forever</option></select>
         <p id="finish-hint" class="hint">Stops at the last node. Restore GPS clears simulation.</p>
-        <div class="button-row"><button id="play" class="primary" disabled>Play route</button><button id="pause" disabled>Pause</button></div>
+        <div class="button-row"><button id="play" class="primary" disabled>Play route</button><button id="pause" disabled>Pause</button><button id="stop" disabled title="End playback and edit routes; hold the last location">Stop</button></div>
         <progress id="progress" max="1" value="0" aria-label="Route progress"></progress>
         <p id="playback-detail" class="hint">Playback continues while this tab is in the background.</p>
         <div class="button-row"><label class="file-button">Import file<input id="import" type="file" accept=".gpx,.geojson,.json"></label><button id="export">Export GeoJSON</button></div>

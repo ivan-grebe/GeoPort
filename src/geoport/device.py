@@ -53,9 +53,6 @@ class DeviceConnection:
     async def clear(self):
         await self.simulation.clear()
 
-    async def enable_wifi(self):
-        await self.lockdown.set_enable_wifi_connections(True)
-
     async def wait_disconnected(self):
         await self.dvt.dtx.wait_disconnected()
 

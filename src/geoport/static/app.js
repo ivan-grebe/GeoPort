@@ -1,3 +1,5 @@
+import { RouteArrows } from './route-arrows.js';
+
 const $ = (id) => document.getElementById(id);
 const token = document.querySelector('meta[name="geoport-token"]').content;
 let session = { status: 'disconnected', session_id: null };
@@ -8,7 +10,7 @@ let routes = [];
 let bookmarks = [];
 let drawing = false;
 let selectedPoint = null;
-let map, selectedMarker, liveMarker, routeLayer;
+let map, selectedMarker, liveMarker, routeLayer, routeArrows;
 let routeNodes = [];
 
 function notice(message, error = false) {
@@ -33,10 +35,11 @@ function updateControls() {
   const paused = session.status === 'paused';
   $('connect').disabled = busy || connected || !$('device').value;
   $('device').disabled = busy || connected;
-  for (const id of ['disconnect', 'restore', 'wifi']) $(id).disabled = busy || !connected;
+  for (const id of ['disconnect', 'restore']) $(id).disabled = busy || !connected;
   $('simulate').disabled = busy || !connected;
   $('play').disabled = busy || !connected || playing || paused || (activeRoute()?.points.length || 0) < 2;
   $('pause').disabled = busy || !(playing || paused);
+  $('stop').disabled = busy || !connected || !session.playback;
   $('pause').textContent = paused ? 'Resume' : 'Pause';
   for (const id of ['draw', 'new-route', 'clear-route', 'add-node', 'undo-node', 'close-route', 'routes', 'import', 'speed', 'finish']) {
     $(id).disabled = busy || playing || paused;
@@ -67,6 +70,7 @@ function updateControls() {
 
 function applySession(result) {
   session = result;
+  routeArrows?.setDirection(result.playback?.direction === 'reverse');
   if (result.location) {
     const point = result.location;
     if (map) {
@@ -208,6 +212,8 @@ function renderRoute(fit = false) {
     routeNodes.forEach((node) => node.remove());
     routeNodes = [];
     routeLayer = route ? L.polyline(routePoints(route), { color: '#0867b2', weight: 3 }).addTo(map) : null;
+    routeArrows.setRoute(route ? routePoints(route) : []);
+    routeArrows.layer.bringToFront();
     if (route) {
       const indices = route.points.length <= 200
         ? route.points.map((_, i) => i) : [0, route.points.length - 1];
@@ -253,6 +259,7 @@ function initializeMap() {
     return;
   }
   map = L.map('map', { zoomControl: false }).setView([37.7749, -122.4194], 12);
+  routeArrows = new RouteArrows(map);
   L.control.zoom({ position: 'topright' }).addTo(map);
   const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -273,8 +280,6 @@ $('connect').addEventListener('click', () => {
 });
 $('disconnect').addEventListener('click', () => command('/api/disconnect', {}, 'POST', 'Restore GPS request sent. Device disconnected.'));
 $('restore').addEventListener('click', () => command('/api/location', {}, 'DELETE', 'Restore GPS request sent. Route playback stopped.'));
-$('wifi').addEventListener('click', () => command('/api/wifi', {}, 'POST',
-  'Wi-Fi connections enabled. Disconnect here, unplug USB, then refresh and reconnect on the same Wi-Fi. The computer must stay running.'));
 $('location-form').addEventListener('submit', (event) => {
   event.preventDefault();
   try {
@@ -368,6 +373,8 @@ $('pause').addEventListener('click', () => {
   const action = session.status === 'paused' ? 'resume' : 'pause';
   command(`/api/playback/${action}`, {}, 'POST', action === 'pause' ? 'Route paused at the last position.' : 'Route resumed.');
 });
+$('stop').addEventListener('click', () => command('/api/playback/stop', {}, 'POST',
+  'Route stopped at the last location. Edit this route or create a new one. Restore GPS returns to your real location.'));
 
 $('import').addEventListener('change', async (event) => {
   const file = event.target.files[0];

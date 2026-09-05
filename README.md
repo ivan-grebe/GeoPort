@@ -7,7 +7,7 @@ Simulate an iPhone's location and routes from a local browser interface. Fork of
 ## Features
 
 - Set a location using the map, search, or coordinates; restore real GPS when finished.
-- Connect and drag route nodes, choose speed in km/h, and pause or resume playback.
+- Connect and drag route nodes, follow direction arrows, choose speed in km/h, and pause, resume, or stop playback.
 - Finish modes: stop, loop a closed route, restart from the beginning, or reverse back and forth.
 - Import GPX/GeoJSON and export GeoJSON. Routes follow straight segments between nodes.
 - USB and local Wi-Fi connections; Australian fuel prices with state filtering.
@@ -32,7 +32,8 @@ Simulate an iPhone's location and routes from a local browser interface. Fork of
 ## App Notes
 
 - Keep GeoPort running on the computer. Closing the browser tab does not stop it.
-- For Wi-Fi: click **Enable Wi-Fi connections** while connected by USB, disconnect, unplug, and reconnect on the same network. The computer must remain reachable.
+- **Stop** ends route playback and unlocks editing, holding the last location. **Restore GPS** returns to the real location.
+- Wi-Fi requires prior pairing and wireless connections already enabled on the device. The phone and computer must share a local network.
 - iOS may restore the real location after unplugging or losing the connection ([#190](https://github.com/davesc63/GeoPort/issues/190)); disconnected simulation is not guaranteed. If simulation remains, reconnect and use **Restore GPS**.
 - The EXE is unsigned. USB connection was tested and location simulation confirmed by a user on an iPhone 13 Pro with iOS 27 beta; physical route playback and Wi-Fi remain unverified.
 

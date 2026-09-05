@@ -104,8 +104,14 @@ class DeviceSession:
                         await self.connection.clear()
                         self.route = None
                         self.state.update(status="ready", location=None, playback=None, error=None)
-                    elif command == "wifi":
-                        await self.connection.enable_wifi()
+                    elif command == "stop":
+                        await self._cancel_playback()
+                        self.route = None
+                        self.state.update(
+                            status="simulating" if self.state["location"] else "ready",
+                            playback=None,
+                            error=None,
+                        )
                     elif command == "play":
                         await self._cancel_playback()
                         self.route, self.distance, self.speed_kmh = route, 0.0, velocity

@@ -117,17 +117,13 @@ def create_app(runtime):
         command = "location" if request.method == "POST" else "clear"
         return jsonify(runtime.call("command", command, body()))
 
-    @app.post("/api/wifi")
-    def wifi():
-        return jsonify(runtime.call("command", "wifi", body()))
-
     @app.post("/api/playback")
     def play():
         return jsonify(runtime.call("command", "play", body()))
 
     @app.post("/api/playback/<action>")
     def playback_action(action):
-        if action not in {"pause", "resume"}:
+        if action not in {"pause", "resume", "stop"}:
             raise GeoPortError("Unknown playback action.", status=404)
         return jsonify(runtime.call("command", action, body()))
 
