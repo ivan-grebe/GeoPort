@@ -1,4 +1,4 @@
-"""Entry point for the standalone Windows executable."""
+"""Run GeoPort from source or as a standalone executable."""
 
 import multiprocessing
 

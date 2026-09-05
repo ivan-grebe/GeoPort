@@ -42,8 +42,8 @@ class ImageCache:
                 return tuple(target / name for name in FILES)
             if target.exists():
                 raise GeoPortError(
-                    "The cached developer image is incomplete. Remove the GeoPort image cache "
-                    "described in the FAQ and reconnect.",
+                    "The cached developer image is incomplete. Close GeoPort, "
+                    f"delete the image folder at {target}, and reconnect.",
                     "image_cache_invalid",
                     503,
                 )

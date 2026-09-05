@@ -1,0 +1,31 @@
+name: Windows release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt pyinstaller==6.22.2
+      - name: Build GeoPort.exe
+        run: >-
+          python -m PyInstaller --noconfirm --onefile --console --noupx --name GeoPort
+          --paths src --add-data "src/geoport/templates:geoport/templates"
+          --add-data "src/geoport/static:geoport/static" --add-data "LICENSE:licenses/GeoPort"
+          --recursive-copy-metadata pymobiledevice3 --exclude-module pytest
+          --exclude-module IPython --exclude-module xonsh src/main.py
+      - name: Verify startup
+        run: ./dist/GeoPort.exe --version
+      - name: Publish executable
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $releaseOptions = @()
+          if ($env:GITHUB_REF_NAME.Contains('-')) { $releaseOptions += '--prerelease' }
+          gh release create $env:GITHUB_REF_NAME dist/GeoPort.exe --verify-tag --title "GeoPort $env:GITHUB_REF_NAME" --generate-notes @releaseOptions

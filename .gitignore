@@ -5,6 +5,7 @@ __pycache__/
 .ruff_cache/
 dist/
 build/
+*.spec
 *.egg-info/
 node_modules/
 test-results/
