@@ -1,59 +1,56 @@
-# GeoPort: Your Location, Anywhere! 🌍
+# GeoPort
 
-Simulate your iPhone's location and routes from a simple map interface.
+iPhone location and route simulation.
 
-**[Download GeoPort for Windows](https://github.com/ivan-grebe/GeoPort/releases)** · [Original project](https://github.com/davesc63/GeoPort)
+[Download](https://github.com/ivan-grebe/GeoPort/releases)
 
 ![GeoPort](images/geoport.png)
 
-## Key Features
+## Features
 
-- Set a location using the map, place search, or coordinates.
-- Connect and drag numbered route nodes, or import GPX/GeoJSON. Enter a speed in km/h and pause or resume movement.
-- On route finish, stop, loop a connected route, restart from the beginning, or travel back and forth indefinitely.
-- Connect over USB or supported local Wi-Fi connections.
-- Explore Australian fuel prices with Fuel Mode.
-- Restore GPS when you're finished.
+- Set coordinates using the map or place search.
+- Edit route nodes, import GPX/GeoJSON, export GeoJSON, and set playback speed.
+- Stop, loop, restart, or reverse at the end of a route.
+- USB and local Wi-Fi connections.
+- Australian fuel prices.
 
-## Installation
+## Setup
 
-1. Download `GeoPort.exe` from [Releases](https://github.com/ivan-grebe/GeoPort/releases). No Python installation needed.
-2. Double-click it to open GeoPort in your browser. Keep the console window open while using it.
-3. Connect and unlock your iPhone, accept **Trust This Computer**, and select **Connect** in GeoPort.
-4. Choose a location and click **Simulate location**.
+Requires Apple Devices or iTunes on Windows, and Developer Mode on the iPhone. Target: iOS 17.4+.
 
-**Windows:** Apple Devices or iTunes must be installed to provide Apple's device connectivity services.
+1. Download and run `GeoPort.exe`.
+2. Connect the iPhone by USB, unlock it, and accept **Trust This Computer**.
+3. Click **Connect**, select a location, and click **Simulate location**.
+4. Use **Restore GPS** to stop simulation. Press **Ctrl+C** in the console to exit.
 
-**Developer Mode:** Enable it in **Settings → Privacy & Security → Developer Mode**, finish the restart, and confirm on your phone. Keep your passcode enabled.
+Keep the phone awake during connection setup. Initial setup requires internet access.
 
-## App Notes
+For Wi-Fi, pair over USB and enable Wi-Fi connections, then disconnect and reconnect on the same network. The computer must stay running and reachable.
 
-- This development version targets **iOS 17.4+**. The Windows EXE's USB Connect/Disconnect flow was checked on an iPhone 13 Pro running iOS 27 beta. Physical route playback and Wi-Fi still need testing.
-- The Windows executable is unsigned. First-time device setup needs internet access to prepare Apple's developer services.
-- Use **Restore GPS** when finished. Press **Ctrl+C in GeoPort's console** to shut down normally. Closing the browser tab alone does not stop it.
-- For Wi-Fi, pair over USB and enable Wi-Fi connections first. Disconnect, unplug, then reconnect on the same local network. The computer must stay running and reachable.
-- Location persistence after disconnection is not guaranteed. If simulation remains active, reconnect and use **Restore GPS**.
-- Routes follow the points you supply; automatic road routing is not included. Map tiles, place searches, and optional fuel prices need their online providers.
-- **Add nodes** connects map clicks in order. Drag nodes to move them, or use **Add coordinates**. Click the first node while adding, or check **Connect last node to first**, to close a loop. Imports over 200 nodes show draggable endpoints only.
-- **Loop** follows the closing segment continuously. **Restart** jumps back to the beginning. **Reverse** retraces the route. These modes repeat until paused or stopped with **Restore GPS**.
-- If Connect fails, the page and console report the setup step and error detail. Include that full message when reporting the problem.
-- Keep the iPhone unlocked and awake during initial connection setup. A locked phone can refuse the developer image upload.
+## Routes
 
-## Run From Source
+**Add nodes** connects map clicks in order. Drag nodes to move them or use **Add coordinates**. Enter speed in km/h and choose the finish mode:
 
-With Python 3.12 installed, run these commands from the repository:
+- **Stop:** hold the last location.
+- **Loop:** follow the closing segment and repeat. Requires connecting the last node to the first.
+- **Restart:** jump to the first node and repeat.
+- **Reverse:** travel back and forth along the route.
+
+**Pause** holds position; **Restore GPS** ends playback. Routes use straight segments, without road routing.
+
+## Source
+
+Python 3.12:
 
 ```sh
 python -m pip install -r requirements.txt
 python src/main.py
 ```
 
-The app opens at `http://127.0.0.1:54321`. If that port is occupied, use `python src/main.py --port 0`.
+Local interface: `http://127.0.0.1:54321`. Use `--port 0` for a free port.
 
-Windows release builds are handled by the small [release workflow](.github/workflows/release.yml). Executables are distributed through Releases.
+## Credits
 
-## Tech Stuff and Recognition
+Fork of [davesc63/GeoPort](https://github.com/davesc63/GeoPort). Device communication uses [pymobiledevice3](https://github.com/doronz88/pymobiledevice3). Maps use Leaflet and OpenStreetMap.
 
-This fork builds on [davesc63/GeoPort](https://github.com/davesc63/GeoPort), using Python, Flask, [pymobiledevice3](https://github.com/doronz88/pymobiledevice3), and [Leaflet](https://leafletjs.com/). Map data comes from OpenStreetMap, with GeographicLib for route interpolation.
-
-Licensed under [GPL-3.0](LICENSE).
+[GPL-3.0](LICENSE).
