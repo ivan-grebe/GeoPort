@@ -21,7 +21,7 @@
         <label for="device">Available devices</label>
         <select id="device"><option value="">Looking for devices…</option></select>
         <div class="button-row"><button id="connect" class="primary" disabled>Connect</button>
-          <button id="disconnect" disabled>Disconnect</button></div>
+          <button id="disconnect" class="danger" disabled>Disconnect</button></div>
         <p id="device-hint" class="hint">Unlock your iPhone and connect it by USB to pair.</p>
       </section>
       <section aria-labelledby="place-heading">
@@ -40,8 +40,8 @@
       </section>
       <section aria-labelledby="route-heading">
         <h2 id="route-heading">Route</h2>
-        <div class="button-row"><button id="new-route">New route</button><button id="draw">Add nodes</button><button id="clear-route">Delete route</button></div>
-        <div class="button-row"><button id="add-node">Add coordinates</button><button id="undo-node">Remove last node</button></div>
+        <div class="button-row"><button id="new-route">New route</button><button id="draw">Add nodes</button><button id="clear-route" class="danger">Delete route</button></div>
+        <div class="button-row"><button id="add-node">Add coordinates</button><button id="undo-node" class="danger">Remove last node</button></div>
         <p id="route-hint" class="hint">Draw a route or import a GPX / GeoJSON file.</p>
         <label for="routes">Route selection</label><select id="routes"><option value="">No routes yet</option></select>
         <label class="checkbox"><input id="close-route" type="checkbox">Connect last node to first</label>
@@ -50,7 +50,7 @@
         <label for="finish">On route finish</label>
         <select id="finish"><option value="stop">Stop at the end</option><option value="loop" disabled>Loop connected route forever</option><option value="restart">Restart from beginning forever</option><option value="reverse">Reverse back and forth forever</option></select>
         <p id="finish-hint" class="hint">Stops at the last node. Restore GPS clears simulation.</p>
-        <div class="button-row"><button id="play" class="primary" disabled>Play route</button><button id="pause" disabled>Pause</button><button id="stop" disabled title="End playback and edit routes; hold the last location">Stop</button></div>
+        <div class="button-row"><button id="play" class="primary" disabled>Play route</button><button id="pause" disabled>Pause</button><button id="stop" class="danger" disabled title="End playback and edit routes; hold the last location">Stop</button></div>
         <progress id="progress" max="1" value="0" aria-label="Route progress"></progress>
         <p id="playback-detail" class="hint">Playback continues while this tab is in the background.</p>
         <div class="button-row"><label class="file-button">Import file<input id="import" type="file" accept=".gpx,.geojson,.json"></label><button id="export">Export GeoJSON</button></div>

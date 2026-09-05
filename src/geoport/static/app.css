@@ -36,13 +36,17 @@ input, select, button, .file-button { font: inherit; color: var(--ink); backgrou
 input, select { width: 100%; min-width: 0; padding: 5px 7px; }
 select { margin-bottom: 8px; }
 button, .file-button { padding: 5px 9px; cursor: pointer; }
-button:hover, .file-button:hover { background: var(--soft); }
+button:hover:enabled, .file-button:hover { background: var(--soft); }
 button:disabled { opacity: .5; cursor: default; }
 .primary { background: var(--accent); border-color: var(--accent); color: var(--paper); }
-.primary:hover { background: var(--accent); filter: brightness(.93); }
+.primary:hover:enabled { background: var(--accent); filter: brightness(.93); }
+.danger { background: #b42318; border-color: #b42318; color: #fff; }
+.danger:hover:enabled { background: #912018; border-color: #912018; }
 .quiet { min-height: 28px; }
 .button-row, .input-row, .coordinate-row, .speed-row { display: flex; gap: 6px; margin-bottom: 8px; }
 .button-row > *, .coordinate-row > *, .speed-row > * { flex: 1; min-width: 0; }
+.button-row { flex-wrap: wrap; }
+.button-row > button, .button-row > .file-button { flex: 1 0 auto; white-space: nowrap; }
 .input-row input { flex: 1; }
 .coordinate-row { margin-top: 8px; }
 .coordinate-row input, .speed-row input, .speed-row select { margin-top: 4px; }
