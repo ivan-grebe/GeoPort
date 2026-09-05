@@ -19,9 +19,13 @@ jobs:
           --paths src --add-data "src/geoport/templates:geoport/templates"
           --add-data "src/geoport/static:geoport/static" --add-data "LICENSE:licenses/GeoPort"
           --recursive-copy-metadata pymobiledevice3 --exclude-module pytest
+          --collect-all pytun_pmd3
           --exclude-module IPython --exclude-module xonsh src/main.py
       - name: Verify startup
-        run: ./dist/GeoPort.exe --version
+        run: |
+          ./dist/GeoPort.exe --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -c "from PyInstaller.archive.readers import CArchiveReader; archive = CArchiveReader('dist/GeoPort.exe'); assert any(name.replace(chr(92), '/').endswith('pytun_pmd3/wintun/bin/amd64/wintun.dll') for name in archive.toc), 'Missing Windows tunnel DLL'"
       - name: Publish executable
         env:
           GH_TOKEN: ${{ github.token }}

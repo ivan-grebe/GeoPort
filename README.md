@@ -28,7 +28,7 @@ Simulate your iPhone's location and routes from a simple map interface.
 
 ## App Notes
 
-- This development version targets **iOS 17.4+**. Physical USB/Wi-Fi testing, including iOS 27 beta compatibility, remains outstanding.
+- This development version targets **iOS 17.4+**. The Windows EXE's USB Connect/Disconnect flow was checked on an iPhone 13 Pro running iOS 27 beta. Physical route playback and Wi-Fi still need testing.
 - The Windows executable is unsigned. First-time device setup needs internet access to prepare Apple's developer services.
 - Use **Restore GPS** when finished. Press **Ctrl+C in GeoPort's console** to shut down normally. Closing the browser tab alone does not stop it.
 - For Wi-Fi, pair over USB and enable Wi-Fi connections first. Disconnect, unplug, then reconnect on the same local network. The computer must stay running and reachable.
@@ -37,6 +37,7 @@ Simulate your iPhone's location and routes from a simple map interface.
 - **Add nodes** connects map clicks in order. Drag nodes to move them, or use **Add coordinates**. Click the first node while adding, or check **Connect last node to first**, to close a loop. Imports over 200 nodes show draggable endpoints only.
 - **Loop** follows the closing segment continuously. **Restart** jumps back to the beginning. **Reverse** retraces the route. These modes repeat until paused or stopped with **Restore GPS**.
 - If Connect fails, the page and console report the setup step and error detail. Include that full message when reporting the problem.
+- Keep the iPhone unlocked and awake during initial connection setup. A locked phone can refuse the developer image upload.
 
 ## Run From Source
 

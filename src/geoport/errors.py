@@ -14,6 +14,13 @@ def device_error(exc: Exception) -> GeoPortError:
     if isinstance(exc, GeoPortError):
         return exc
     name = type(exc).__name__
+    if name == "PyMobileDevice3Exception" and "DeviceLocked" in str(exc):
+        return GeoPortError(
+            "Your iPhone is locked. Unlock it and keep its screen awake while GeoPort "
+            "prepares developer services, then click Connect again.",
+            "device_locked",
+            409,
+        )
     if isinstance(exc, TimeoutError):
         return GeoPortError(
             "The device did not respond in time. Unlock it, check the connection, and reconnect.",
