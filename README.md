@@ -2,7 +2,7 @@
 
 Simulate an iPhone's location and routes from a local browser interface. Fork of [davesc63/GeoPort](https://github.com/davesc63/GeoPort).
 
-[Downloads](https://github.com/ivan-grebe/GeoPort/releases) · [Issues](https://github.com/ivan-grebe/GeoPort/issues)
+[Downloads](https://github.com/ivan-grebe/GeoPort/releases)
 
 ## Features
 
