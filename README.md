@@ -17,6 +17,7 @@ Simulate an iPhone's location and routes from a local browser interface. Fork of
 ## Requirements
 
 - iOS 17.4+ with **Settings → Privacy & Security → Developer Mode** enabled. Complete the restart and confirmation; keep your passcode enabled.
+- If Developer Mode is hidden, connect over USB and click **Connect** in GeoPort to reveal it.
 - Windows with Apple Devices or iTunes installed.
 - Internet access for initial developer image setup, maps, search, and fuel prices.
 
@@ -32,8 +33,8 @@ Simulate an iPhone's location and routes from a local browser interface. Fork of
 
 - Keep GeoPort running on the computer. Closing the browser tab does not stop it.
 - For Wi-Fi: click **Enable Wi-Fi connections** while connected by USB, disconnect, unplug, and reconnect on the same network. The computer must remain reachable.
-- If simulation remains after disconnection, reconnect and use **Restore GPS**.
-- The EXE is unsigned. USB Connect/Disconnect was verified on an iPhone 13 Pro with iOS 27 beta; physical route playback and Wi-Fi remain unverified.
+- iOS may restore the real location after unplugging or losing the connection ([#190](https://github.com/davesc63/GeoPort/issues/190)); disconnected simulation is not guaranteed. If simulation remains, reconnect and use **Restore GPS**.
+- The EXE is unsigned. USB connection was tested and location simulation confirmed by a user on an iPhone 13 Pro with iOS 27 beta; physical route playback and Wi-Fi remain unverified.
 
 ## Tech Stuff and Recognition
 

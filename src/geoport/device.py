@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from packaging.version import Version
 from pymobiledevice3.lockdown import create_using_usbmux
 from pymobiledevice3.remote.rsd_tunnel import PreferredRsdTunnel
+from pymobiledevice3.services.amfi import AmfiService
 from pymobiledevice3.services.dvt.instruments.dvt_provider import DvtProvider
 from pymobiledevice3.services.dvt.instruments.location_simulation import LocationSimulation
 from pymobiledevice3.services.mobile_image_mounter import (
@@ -183,8 +184,11 @@ class MobileDeviceBackend:
                         409,
                     )
                 if not await lockdown.get_developer_mode_status():
+                    async with setup_step("Revealing Developer Mode"):
+                        await AmfiService(lockdown).reveal_developer_mode_option_in_ui()
                     raise GeoPortError(
-                        "Enable Developer Mode in Settings → Privacy & Security, finish the "
+                        "Developer Mode is now visible in Settings → Privacy & Security. "
+                        "Enable it, finish the "
                         "restart and confirmation, then reconnect. Keep your passcode enabled.",
                         "developer_mode_required",
                         409,
