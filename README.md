@@ -1,112 +1,86 @@
-# GeoPort: Your Location, Anywhere! 🌍 
+# GeoPort
 
+Simulate locations and routes on your own iPhone from a local browser interface.
 
-<p align="center">
-  
-  <a href="https://www.buymeacoffee.com/davesc63">
-    <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=🍺&slug=davesc63&button_colour=FFDD00&font_colour=000000&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a beer">
-  </a><br> https://geoport.me
-</p>
+This is a development edition of [ivan-grebe/GeoPort](https://github.com/ivan-grebe/GeoPort), based on [davesc63/GeoPort](https://github.com/davesc63/GeoPort). It replaces the original connection lifecycle and UI implementation. It is not an upstream 4.0.2 release.
 
+## Status
 
-[![Join Discord](https://img.shields.io/badge/Discord-Join%20Us-7289DA?logo=discord&style=for-the-badge)](https://discord.gg/genRca55Nb)<br>
-<a href="https://github.com/davesc63/GeoPort/releases/tag/v4.0.2">Release Notes and Downloads</a><br><p>
-<a href="https://github.com/davesc63/GeoPort/blob/main/FAQ.md">Need Help? - FAQ</a><br><p>
-<a href="https://www.surveymonkey.com/r/BLQ8M75">Your feedback helps - Fill out the Survey</a>
+The current target is **iOS 17.4+**, using **pymobiledevice3 11.3.0**. The older custom QUIC/driver paths have been removed. Modern iOS support is a target, not a hardware certification: automated tests use a simulated device. Physical USB/Wi-Fi connections, image mounting, and iOS 27 beta behavior still require testing. Native installers and signed releases have not been produced.
 
-<p align="center"><strong>GeoPort needs your help.</p></strong> </p>
-Please consider <strong>donating</strong> and supporting the project. Your support helps to grow the platform and features.<br><p></p><br><p></p>
+## Run from source
 
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run from this repository:
 
-Immerse yourself in a world of possibilities with **GeoPort**, the ultimate location simulation app. GeoPort allows you to take control of your virtual presence, letting you be anywhere on the globe at the touch of a button. Whether you want to explore distant cities, surprise friends with exotic check-ins, or test location-based apps, GeoPort is your passport to a limitless world.
+```sh
+uv sync --locked --python 3.12
+uv run geoport
+```
 
+The app opens `http://127.0.0.1:54321`. If the port is occupied, use `uv run geoport --port 0` to select a free port. Use `--no-browser` to open the printed address yourself.
 
+Python 3.12–3.14 is allowed by the package; local validation used Python 3.12 on Windows. CI is configured for Python 3.12 on Windows, macOS, and Linux.
 
-## Key Features
+Before connecting:
 
-- **Global Presence**
-Spoof your location and appear as if you're in any city, country, or landmark globally.
+- On Windows, install Apple's device connectivity software (Apple Devices or iTunes). On Linux, install and run usbmuxd. macOS includes Apple's device service.
+- Unlock the phone, connect USB, and accept **Trust This Computer**.
+- Enable **Settings → Privacy & Security → Developer Mode**, complete the restart, and confirm on the phone. Keep your passcode enabled.
+- Allow internet access for the initial developer image download and personalization. The app checks for an already mounted image first.
 
-- **Explore with Ease**
-Experience the thrill of virtual travel without leaving your comfort zone. Wander the streets of Tokyo, relax on a beach in Bali, or stroll through the historic alleys of Rome—all from the palm of your hand.
+GeoPort uses the library's unprivileged tunnel implementation. It does not elevate the whole app, install third-party drivers, or stop system daemons itself.
 
-- **Test Apps Effectively**
-Developers, take note! GeoPort is your go-to tool for testing location-based features in your apps. Simulate diverse scenarios effortlessly.
+## Use
 
-- **Privacy and Security**
-Your privacy matters. GeoPort ensures a secure experience, allowing you to control when and where your virtual self appears.
+1. Select your device and click **Connect**. Pairing and developer image preparation can take up to a minute.
+2. Click the map, search for a place, or enter latitude and longitude. Click **Simulate location**.
+3. Draw a route or import GPX/GeoJSON. Choose a speed, including a custom value, and click **Play route**.
+4. Use **Pause / Resume** to hold and continue a route. **Restore GPS** cancels playback and asks the device to clear location simulation.
+5. Click **Disconnect**, or press Ctrl+C in the terminal to restore GPS and shut down normally.
 
-- **User-Friendly Interface**
-Seamlessly navigate GeoPort's intuitive interface. Set your desired location with a few taps and teleport within seconds.
+The outlined point is your selection; the filled point is the last position accepted by the device service. A successful API call does not independently verify what every iOS app displays. If the connection fails, GeoPort stops playback and reports the failure. Reconnect and use **Restore GPS** if a simulated location remains.
 
-- **Unleash Your Imagination with GeoPort!**
-Download now and elevate your location experience beyond boundaries. Teleportation has never been this easy—**GeoPort**, where every location is just a click away!
+Route timing runs on the backend, so background browser tabs do not control movement. Routes follow geodesic segments between supplied points. There is no automatic road routing in this edition. GPX track segments and GeoJSON MultiLineStrings remain separate selectable routes. Imports accept up to 5 MB and 20,000 points. Route timing comes from the selected speed; GPX timestamps and elevation are not replayed.
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/geoport2.png" alt="geoport" width="50%"><br><br>
-   <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/geoport-demo.gif" alt="geoport">
-</p>
+## Wi-Fi and phone-only use
 
-## Fuel Mode:
+After connecting by USB, click **Enable Wi-Fi connections**. Disconnect in GeoPort, unplug USB, refresh the device list, and reconnect with both devices on the same local network. The library chooses the transport for the selected device. The list shows available transports, not a promise of seamless USB-to-Wi-Fi handoff.
 
-For the :australia: Aussies :australia: who love to fire up their choppers and get their *Frugal Fuels* from the KwikiMart.
-the **"Fuel"** mode of GeoPort to easily select the best prices across Australia! There is even the ability to select **state-based** pricing
+The computer must remain running and reachable. Sleep, network changes, and OS updates can end a session. This app does not promise persistence after disconnection or operate over cellular by itself.
 
-<p align="center">
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/fuel.png" alt="fuel" width="50%">
-</p>
+For the separate investigation into on-device simulation on an iPhone 13 Pro running iOS 27 Public Beta, see [phone-only research](docs/phone-only-research.md).
 
-## Developer Mode
+## Privacy and external services
 
-**Developer Mode:** Enable developer mode on connected iOS devices.
+- No telemetry, device-name uploads, IP geolocation, upstream broadcasts, or automatic update checks.
+- Device control binds to loopback only. Mutations require the token issued to the local page.
+- Leaflet JavaScript and CSS are bundled locally. Map tiles come from OpenStreetMap; submitted searches go to Nominatim. These services receive the map areas or queries you request.
+- Australian fuel data comes from Project Zero Three only when you open that panel. A fuel outage does not prevent device control.
+- pymobiledevice3 manages local pairing records. GeoPort caches developer images in its `geoport-ddi` subfolder. Setup can contact the image distribution source and Apple's personalization services.
 
-They've made it harder to enable Developer Mode, but GeoPort handles it with ease. If you don't have Developer Mode enabled on your iOS device - you will need to temporarily remove your passcode to allow GeoPort to enable Developer Mode (Don't worry, GeoPort will let you know when running the app)
-<p align="center">
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/devmode.png" alt="devmode" width="50%">
-</p>
+## Development
 
-**Passcode Handling**
-<p align="center">
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/passcode.png" alt="passcode" width="50%">
-</p>
+```sh
+uv run pytest
+uv run ruff check src tests
+uv run ruff format --check src tests
+uv build
+```
 
+Browser integration checks need Node.js and Playwright:
 
+```sh
+npm ci
+npx playwright install chromium
+npm run test:browser
+```
 
-## Prerequisites
+The browser test starts `tests.browser_server`, which uses only a fake device. It tests connection, coordinates, custom speed, playback, pause/resume, restoration, import/export, errors, mobile layout, and unavailable map assets. It selects a free local port and writes screenshots under `test-results/`.
 
-An iOS device and a sense of adventure!
-*That's Right* - you do not need to install complex apps like python for **GeoPort** to work
+Python tests explicitly disable the unrelated xonsh pytest plugin pulled in by pymobiledevice3. No hardware is accessed by the automated tests. See [architecture and validation](docs/reliability.md) and [FAQ](FAQ.md).
 
-**Windows Users**
-You will need to install iTunes (we need their USB service so we can discover the iOS device!)
+## Credits
 
-## Installation
+Original GeoPort by [davesc63](https://github.com/davesc63/GeoPort), with this fork maintained at [ivan-grebe/GeoPort](https://github.com/ivan-grebe/GeoPort). Device communication is provided by [pymobiledevice3](https://github.com/doronz88/pymobiledevice3). Maps use [Leaflet](https://leafletjs.com/) and OpenStreetMap data. Interpolation uses GeographicLib; GPX parsing uses gpxpy.
 
-- [Download](https://github.com/davesc63/GeoPort/releases/) the package for your operating system
-- Run the application
-- Explore the world and **Simulate Location**
-
-## App Notes
-- iOS 17 & iOS 18 are supported on both Windows and Mac
-- Administrator / Sudo permissions are required for iOS17
-- If you forget to reset your location when you disconnect, Don't worry! Simply connect your device again and "Stop Location"
-
-## Tech Stuff and recognition
-GeoPort is built with python, flask and pymobiledevice3
-Interface inspired by the popular iFakeLocation, GeoPort is built for familiarity with the addition of iOS17 and Windows support (Windows release imminent)
-
-Pymobiledevice3 - https://github.com/doronz88/pymobiledevice3<br>
-iFakeLocation - https://github.com/master131/iFakeLocation
-
-## Keywords
-iOS 17, location spoofing, ios17 location simulation, ios17 windows support<br>
-iOS 18, location spoofing, ios18 location simulation, ios18 windows support
-
-
-## Pay it forward
-If this tools helps you, please consider buying me a beer so I can keep this app going!<br>
-<p align="center">
-  <a href="https://www.buymeacoffee.com/davesc63">
-    <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=🍺&slug=davesc63&button_colour=FFDD00&font_colour=000000&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a beer">
-  </a>
-</p>
+GeoPort retains its [GPL-3.0 license](LICENSE). The bundled Leaflet distribution retains its [license notice](src/geoport/static/vendor/LEAFLET-LICENSE).

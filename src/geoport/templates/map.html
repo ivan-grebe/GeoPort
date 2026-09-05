@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="geoport-token" content="{{ token }}">
+  <title>GeoPort · Location studio</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  <script defer src="{{ url_for('static', filename='vendor/leaflet.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body>
+  <header><a class="brand" href="/">GeoPort<span class="brand-dot">●</span></a>
+    <span class="edition">LOCATION STUDIO</span>
+    <button id="theme" class="quiet">Dark mode</button>
+  </header>
+  <main>
+    <aside>
+      <div class="intro"><p class="eyebrow">YOUR DEVICE, SOMEWHERE ELSE</p>
+        <h1>A new point<br>of view.</h1><p>Select a place. Walk a route.<br>Restore your GPS when you’re done.</p></div>
+      <section aria-labelledby="device-heading">
+        <div class="section-title"><h2 id="device-heading">01 / Device</h2><button id="refresh" class="quiet">Refresh</button></div>
+        <label for="device">Available devices</label>
+        <select id="device"><option value="">Looking for devices…</option></select>
+        <div class="button-row"><button id="connect" class="primary" disabled>Connect</button>
+          <button id="disconnect" disabled>Disconnect</button></div>
+        <p id="device-hint" class="hint">Unlock your iPhone and connect it by USB to pair.</p>
+        <button id="wifi" class="quiet" disabled>Enable Wi-Fi connections</button>
+      </section>
+      <section aria-labelledby="place-heading">
+        <h2 id="place-heading">02 / Location</h2>
+        <form id="search-form"><label for="search">Search a place or enter latitude, longitude</label>
+          <div class="input-row"><input id="search" placeholder="San Francisco or 37.77, -122.42" autocomplete="off"><button>Find</button></div>
+        </form>
+        <div id="search-results" aria-label="Search results"></div>
+        <form id="location-form"><div class="coordinate-row">
+          <label>Latitude<input id="latitude" type="number" min="-90" max="90" step="any" required placeholder="37.7749"></label>
+          <label>Longitude<input id="longitude" type="number" min="-180" max="180" step="any" required placeholder="-122.4194"></label>
+        </div>
+        <button id="simulate" class="primary full" disabled>Simulate location</button></form>
+        <button id="restore" class="full" disabled>Restore GPS</button>
+        <p class="hint">Click the map to choose a location. The filled dot shows the last position sent to your device.</p>
+      </section>
+      <section aria-labelledby="route-heading">
+        <h2 id="route-heading">03 / Route</h2>
+        <div class="button-row"><button id="draw">Draw route</button><button id="clear-route">Clear route</button></div>
+        <p id="route-hint" class="hint">Draw a route or import a GPX / GeoJSON file.</p>
+        <label for="routes">Route selection</label><select id="routes"><option value="">No routes yet</option></select>
+        <div class="speed-row"><label>Speed<select id="speed"><option value="6">Walk · 6 km/h</option><option value="12">Run · 12 km/h</option><option value="20">Ride · 20 km/h</option><option value="50">Drive · 50 km/h</option><option value="custom">Custom</option></select></label>
+          <label id="custom-speed-label" hidden>km/h<input id="custom-speed" type="number" min="0.01" max="999" step="0.01" value="5"></label></div>
+        <div class="button-row"><button id="play" class="primary" disabled>Play route</button><button id="pause" disabled>Pause</button></div>
+        <progress id="progress" max="1" value="0" aria-label="Route progress"></progress>
+        <p id="playback-detail" class="hint">Playback continues while this tab is in the background.</p>
+        <div class="button-row"><label class="file-button">Import file<input id="import" type="file" accept=".gpx,.geojson,.json"></label><button id="export">Export GeoJSON</button></div>
+        <div id="bookmarks" aria-label="Imported markers"></div>
+      </section>
+      <details id="fuel-panel"><summary>Australian fuel prices</summary>
+        <p class="hint">Optional data from Project Zero Three. Loaded only when opened.</p>
+        <label for="region">Region</label><select id="region"><option>All</option><option>ACT</option><option>NSW</option><option>NT</option><option>QLD</option><option>SA</option><option>TAS</option><option>VIC</option><option>WA</option></select>
+        <div id="fuel-results"></div></details>
+      <footer>Version {{ version }} · Based on <a href="https://github.com/davesc63/GeoPort" target="_blank" rel="noreferrer">GeoPort</a><br>No analytics. Device control stays on this computer.</footer>
+    </aside>
+    <div class="map-panel">
+      <div class="status-strip"><span id="status-dot" class="status-dot"></span><strong id="status">Disconnected</strong><span id="active-device">Connect a device to begin</span></div>
+      <div id="map" aria-label="Location map"></div>
+      <div id="notice" role="status" aria-live="polite">Choose a point on the map or enter coordinates.</div>
+      <div class="map-caption"><span>EXPLORE / SIMULATE / RESTORE</span><span id="live-coordinates">—</span></div>
+    </div>
+  </main>
+</body>
+</html>

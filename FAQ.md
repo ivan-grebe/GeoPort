@@ -1,123 +1,55 @@
-# GeoPort - FAQ
-Current Version: v2.2.0
+# GeoPort troubleshooting
 
-# What's new
-- Map Enhancements: New Provider, new look
-- Map Enahncements: Import geojson and GPX files for all your previously saved locations
-- Map Enahncements: Save your favorite locations or tracks to geojson files and share with friends!
-- Map Enahncements: Draw your own track on the map
-- Map Enahncements: Select the playback speed (walk, run, ride, drive or custom)
-- Resolved: Errno 54: Connection Refused by Remote Host (error due to too many open connections)
+## No devices appear
 
+Unlock the phone, reconnect USB, and refresh. On Windows, confirm Apple's device software can see it. On Linux, check usbmuxd. GeoPort reports device-service errors instead of treating them as an empty list.
 
-# Create Tracks on the map
-- Select the `Line` button
-- Choose a start location on the map
-- Click from point to point to create a route / track on the map
-- Select `Download` to save your track
-  
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/create-track.gif" width="65%">
+A device whose information cannot be read stays selectable. Use **Connect** to accept a pairing prompt. One inaccessible device does not hide the others.
 
-# Import / Save markers on the map
-- Select the `Upload` button
-- Choose a file with coordinates / markers / GPX tracks
-- Information is loaded to the map
-- You can select the `Download` button to save your markers to a file
-- 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/import-markers.gif" width="65%">
+## Developer Mode is required
 
-# Replay a track / auto-walk with speed selection
-- Select the `Upload` button
-- Choose a GPX / geojson file with playback coordinates
-- Select the `Speed` button
-- Choose the playback speed (walk = 6km/h, run = 12km/h, ride = 20km/h, drive = 50km/h, custom = 3 digit input in km/h)
-- 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/gpx-play.gif" width="65%">
+Enable it in **Settings → Privacy & Security → Developer Mode**. Finish the restart and confirmation. Reconnect afterward. GeoPort does not remove the passcode, force a restart, or automate this setting.
 
-# Update / Save markers on the map
-- Double-click the map to place an icon
-- Right-click the icon to pop-up the properties of the marker
-- Enter the details of the location
-- Select `Download` to save your marker information to a file
-- 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/update-markers.gif" width="65%">
+## Preparing developer services fails
 
+Initial setup may download and personalize a developer image. Check internet access and that Developer Mode is enabled. If a newer iOS build changes developer services, pymobiledevice3 may need an update. Replacing the dependency without checking its API and testing a physical device is not sufficient.
 
+Downloads are cancellable and only complete images enter the cache. If GeoPort reports an invalid image cache, close GeoPort and use this command from the repository to print its exact location:
 
+```sh
+uv run python -c "from pymobiledevice3.common import get_home_folder; print(get_home_folder() / 'geoport-ddi')"
+```
 
+Delete only that `geoport-ddi` folder, then reconnect to download a fresh image. Keep the parent folder and pairing records.
 
-# Untethered Wifi connection
-Live life untethered. No longer be tied to using a USB cable to connect the device and spoof location!
-Thanks to some updates in <a href="https://github.com/doronz88/pymobiledevice3">pymobiledevice3</a> I have integrated wifi capability into **GeoPort**
+If a timed-out setup is still closing, wait before reconnecting. GeoPort blocks overlapping retries. If cleanup remains stuck or reports a failure, restart GeoPort.
 
-You will need to connect at least once with a USB cable to create / accept the pairing request. This enables the wifi connection to then be discovered after.
+## Wi-Fi does not appear
 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-wifi.png" width="65%">
+Pair over USB and enable Wi-Fi connections in GeoPort. Use the same local network; guest isolation and blocked mDNS can prevent discovery. Unlock the phone while refreshing. Wi-Fi availability varies by Apple device services, host OS, and network configuration.
 
+No automatic transport handoff is promised. Disconnect in GeoPort before unplugging, then refresh and reconnect.
 
-**Please note**: 
-Wifi devices may not appear when the phone is locked. 
-Wifi is also dependant on your network. The devices should be on the same LAN / Subnet as bonjour can have issues across network ranges / networking devices.
-If your device doesn't appear in the list. Unlock your device, hit refresh a few times. Wifi is not a guaranteed connection method etc etc but it's damn cool and works well!
+## Location updates stop or a connection is lost
 
+Playback stops when a device command fails or the connection reports disconnection. GeoPort clears its connection state and releases resources. Unlock the device, reconnect, and use **Restore GPS** before restarting your route. It does not silently resume a route after reconnecting.
 
-# Location Notifications
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-notifications-demo.gif">
+The filled map point is the last position successfully sent, not a live reading of the phone's real GPS. A success message means the developer service call completed. Check the device to verify the resulting location.
 
-## How to install Mac version
-MacOS installation has been improved to use the Apple DMG process
-I don't have a developer certificate to sign the app, so you will get some popups the first time after downloading.
-Open the DMG file then you can run GeoPort directly there, or you can drag it into your Applications folder
+## Does the location remain after unplugging or closing the computer?
 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-dmg.png" width="75%">
+There is no guarantee. Recent iOS versions can restore the real location when the developer session ends. Wi-Fi still needs the computer running and reachable. See [the separate phone-only investigation](docs/phone-only-research.md).
 
+## Can I use an older iOS version?
 
-### Additional Mac installation steps - One time only
+This development edition targets iOS 17.4+. Earlier custom driver and tunnel paths were removed instead of carrying untested legacy code into the new session model.
 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-verify.png" width="20%">
-<br>
-Open `Settings` 
-Select `Privacy & Security`
-Select `Open`
-<br>
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-open.png" width="60%">
-<br>
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-open2.png" width="60%">
+## Can I use this without a map or fuel service?
 
-## FAQ / Troubleshooting
+Yes. Enter latitude and longitude directly. Leaflet assets are bundled, but map tiles and place searches require their external providers. Fuel prices load only when requested. None of those services is required by the location API.
 
-### Windows Specific
+## Report a problem
 
-If you are running as administrator and receive `Unable to create tunnel within timeout` there is most likely a Windows firewall issue. When GeoPort runs for the first time, you receive a network access prompt when the tunnel adapter is created. In some cases, only a single option is selected. You need to select both **Public** and **Private** networks.
+Include the GeoPort version, host OS, iPhone model, full iOS version/build, transport, exact error, and whether it happened during connect, set, play, pause, restore, or disconnect. Remove device identifiers and pairing data from any logs you share.
 
-If GeoPort is already installed, you can change this setting by going into:
-- `Control Panel - System and Security`
-- Select `Allow an app through Windows Firewall`
-- Select `Change settings`
-- Scroll down to the entry for `GeoPort`
-- Your options here are:
-
-1. Allow both `Public` and `Private`
-2. Delete the entry for GeoPort. Re-run GeoPort and when prompted to allow connects - select both checkboxes
-
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-win-fw1.png"></img>
-### Figure 1 - Windows Firewall in Control Panel
-
-
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-win-fw2.png"></img>
-### Figure 2 - Windows firewall incoming rules
-
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-win-fw3.png"></img>
-### Figure 3 - Network adapter pop-up on first run
-
-### Supported iOS
-All - iOS 17 and below
-
-### Supported OS
-Windows 64-bit
-MacOS ARM
-MacOS Intel
-Linux - Ubuntu 22.04
-
-# Need more help?
-Please open an issue: https://github.com/davesc63/GeoPort/issues
+Do not report this development edition as an upstream 4.0.2 binary. It has a separate architecture and has not yet been certified on physical hardware.
