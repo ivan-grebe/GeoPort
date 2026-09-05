@@ -41,11 +41,16 @@
       </section>
       <section aria-labelledby="route-heading">
         <h2 id="route-heading">Route</h2>
-        <div class="button-row"><button id="draw">Draw route</button><button id="clear-route">Clear route</button></div>
+        <div class="button-row"><button id="new-route">New route</button><button id="draw">Add nodes</button><button id="clear-route">Delete route</button></div>
+        <div class="button-row"><button id="add-node">Add coordinates</button><button id="undo-node">Remove last node</button></div>
         <p id="route-hint" class="hint">Draw a route or import a GPX / GeoJSON file.</p>
         <label for="routes">Route selection</label><select id="routes"><option value="">No routes yet</option></select>
-        <div class="speed-row"><label>Speed<select id="speed"><option value="6">Walk · 6 km/h</option><option value="12">Run · 12 km/h</option><option value="20">Ride · 20 km/h</option><option value="50">Drive · 50 km/h</option><option value="custom">Custom</option></select></label>
-          <label id="custom-speed-label" hidden>km/h<input id="custom-speed" type="number" min="0.01" max="999" step="0.01" value="5"></label></div>
+        <label class="checkbox"><input id="close-route" type="checkbox">Connect last node to first</label>
+        <div class="speed-row"><label>Speed (km/h)<input id="speed" type="number" min="0.01" max="999" step="0.01" value="6" list="speeds"></label>
+          <datalist id="speeds"><option value="6">Walk</option><option value="12">Run</option><option value="20">Ride</option><option value="50">Drive</option></datalist></div>
+        <label for="finish">On route finish</label>
+        <select id="finish"><option value="stop">Stop at the end</option><option value="loop" disabled>Loop connected route forever</option><option value="restart">Restart from beginning forever</option><option value="reverse">Reverse back and forth forever</option></select>
+        <p id="finish-hint" class="hint">Stops at the last node. Restore GPS clears simulation.</p>
         <div class="button-row"><button id="play" class="primary" disabled>Play route</button><button id="pause" disabled>Pause</button></div>
         <progress id="progress" max="1" value="0" aria-label="Route progress"></progress>
         <p id="playback-detail" class="hint">Playback continues while this tab is in the background.</p>

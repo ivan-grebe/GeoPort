@@ -60,7 +60,25 @@ class Route:
             line = Geodesic.WGS84.InverseLine(*start, *end)
             lines.append(line)
             distances.append(distances[-1] + line.s13)
+        if distances[-1] <= 0:
+            raise GeoPortError("A route must cover a nonzero distance.")
         return cls(clean, distances, lines)
+
+    def validate_finish(self, finish):
+        if finish not in ("stop", "loop", "restart", "reverse"):
+            raise GeoPortError("Choose stop, loop, restart, or reverse for the route finish.")
+        if finish == "loop" and self.points[0] != self.points[-1]:
+            raise GeoPortError("Connect the last node to the first before selecting loop.")
+
+    def playback_position(self, travelled, finish):
+        if finish == "stop":
+            return min(travelled, self.length), "forward"
+        if finish == "reverse":
+            phase = travelled % (2 * self.length)
+            if phase < self.length:
+                return phase, "forward"
+            return 2 * self.length - phase, "reverse"
+        return travelled % self.length, "forward"
 
     @property
     def length(self):

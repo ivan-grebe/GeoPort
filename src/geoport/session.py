@@ -29,6 +29,9 @@ class DeviceSession:
         self.route = None
         self.distance = 0.0
         self.speed_kmh = 6.0
+        self.finish = "stop"
+        self.travelled = 0.0
+        self.direction = "forward"
         self.state = {
             "status": "disconnected",
             "session_id": None,
@@ -52,6 +55,9 @@ class DeviceSession:
         point = coordinate(data.get("point")) if command == "location" else None
         route = Route.create(data.get("points")) if command == "play" else None
         velocity = speed(data.get("speed_kmh")) if command == "play" else None
+        finish = data.get("finish", "stop")
+        if command == "play":
+            route.validate_finish(finish)
         if command == "connect" and (
             not isinstance(data.get("device_id"), str) or not data["device_id"].strip()
         ):
@@ -103,6 +109,7 @@ class DeviceSession:
                     elif command == "play":
                         await self._cancel_playback()
                         self.route, self.distance, self.speed_kmh = route, 0.0, velocity
+                        self.finish, self.travelled, self.direction = finish, 0.0, "forward"
                         await self._set(route.points[0])
                         self._start_playback()
                     elif command == "pause":
@@ -116,11 +123,10 @@ class DeviceSession:
                         self._start_playback()
                     else:
                         raise GeoPortError("Unknown command.")
-            except GeoPortError:
+            except GeoPortError as exc:
                 # Setup errors must discard partially acquired resources too.
                 if command == "connect":
-                    await self._close()
-                    self.state["status"] = "disconnected"
+                    await self._fail(exc)
                 raise
             except asyncio.CancelledError:
                 await self._fail(TimeoutError())
@@ -144,6 +150,9 @@ class DeviceSession:
             "distance_m": self.distance,
             "total_m": self.route.length,
             "speed_kmh": self.speed_kmh,
+            "finish": self.finish,
+            "direction": self.direction,
+            "completed_legs": int(self.travelled / self.route.length),
         }
 
     async def _play(self):
@@ -153,18 +162,20 @@ class DeviceSession:
                 await asyncio.sleep(PLAYBACK_INTERVAL)
                 async with self.lock:
                     now = asyncio.get_running_loop().time()
-                    distance = min(
-                        self.route.length, self.distance + (now - previous) * self.speed_kmh / 3.6
-                    )
+                    travelled = self.travelled + (now - previous) * self.speed_kmh / 3.6
+                    distance, direction = self.route.playback_position(travelled, self.finish)
                     try:
                         async with asyncio.timeout(OPERATION_TIMEOUT):
                             await self._set(self.route.position(distance))
                     except Exception as exc:
                         await self._fail(exc)
                         return
-                    self.distance, previous = distance, now
+                    self.distance, self.direction, previous = distance, direction, now
+                    self.travelled = (
+                        min(travelled, self.route.length) if self.finish == "stop" else travelled
+                    )
                     self._progress()
-                    if distance >= self.route.length:
+                    if self.finish == "stop" and travelled >= self.route.length:
                         self.state["status"] = "simulating"
                         return
         except asyncio.CancelledError:
@@ -204,7 +215,7 @@ class DeviceSession:
 
     async def _fail(self, exc):
         error = device_error(exc)
-        logger.warning("Device operation failed: %s", error.code)
+        logger.warning("Device operation failed [%s]: %s", error.code, error)
         try:
             await self._close()
         except Exception:

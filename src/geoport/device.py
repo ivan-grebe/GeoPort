@@ -30,6 +30,15 @@ async def open_lockdown(**kwargs):
         await client.close()
 
 
+@asynccontextmanager
+async def setup_step(label):
+    try:
+        yield
+    except Exception as exc:
+        error = device_error(exc)
+        raise GeoPortError(f"{label}: {error}", error.code, error.status) from exc
+
+
 @dataclass
 class DeviceConnection:
     info: dict
@@ -155,40 +164,44 @@ class MobileDeviceBackend:
     async def connect(self, device_id):
         self._check_cleanup()
         async with AsyncExitStack() as stack:
-            lockdown = await self._enter(
-                stack,
-                open_lockdown(
-                    serial=device_id,
-                    autopair=True,
-                    pair_timeout=30,
-                ),
-            )
-            if lockdown.udid != device_id:
-                raise GeoPortError("The connected device does not match your selection.")
-            if Version(lockdown.product_version) < Version("17.4"):
-                raise GeoPortError(
-                    "This edition targets iOS 17.4 and newer. Earlier custom tunnel paths "
-                    "are no longer included.",
-                    "unsupported_ios",
-                    409,
+            async with setup_step("Pairing and Developer Mode"):
+                lockdown = await self._enter(
+                    stack,
+                    open_lockdown(
+                        serial=device_id,
+                        autopair=True,
+                        pair_timeout=30,
+                    ),
                 )
-            if not await lockdown.get_developer_mode_status():
-                raise GeoPortError(
-                    "Enable Developer Mode in Settings → Privacy & Security, finish the restart "
-                    "and confirmation, then reconnect. Keep your passcode enabled.",
-                    "developer_mode_required",
-                    409,
-                )
-            async with AsyncExitStack() as mounting:
-                mounter = await self._enter(mounting, PersonalizedImageMounter(lockdown))
-                if not await mounter.is_image_mounted("Personalized"):
-                    image, manifest, trustcache = await self.images.get()
-                    await mounter.mount(image, manifest, trustcache)
-            rsd = await self._enter(stack, PreferredRsdTunnel(serial=device_id))
-            if rsd.udid != device_id:
-                raise GeoPortError("The tunnel belongs to a different device.")
-            dvt = await self._enter(stack, DvtProvider(rsd))
-            simulation = await self._enter(stack, LocationSimulation(dvt))
+                if lockdown.udid != device_id:
+                    raise GeoPortError("The connected device does not match your selection.")
+                if Version(lockdown.product_version) < Version("17.4"):
+                    raise GeoPortError(
+                        "This edition targets iOS 17.4 and newer. Earlier custom tunnel paths "
+                        "are no longer included.",
+                        "unsupported_ios",
+                        409,
+                    )
+                if not await lockdown.get_developer_mode_status():
+                    raise GeoPortError(
+                        "Enable Developer Mode in Settings → Privacy & Security, finish the "
+                        "restart and confirmation, then reconnect. Keep your passcode enabled.",
+                        "developer_mode_required",
+                        409,
+                    )
+            async with setup_step("Preparing the developer image"):
+                async with AsyncExitStack() as mounting:
+                    mounter = await self._enter(mounting, PersonalizedImageMounter(lockdown))
+                    if not await mounter.is_image_mounted("Personalized"):
+                        image, manifest, trustcache = await self.images.get()
+                        await mounter.mount(image, manifest, trustcache)
+            async with setup_step("Opening the device tunnel"):
+                rsd = await self._enter(stack, PreferredRsdTunnel(serial=device_id))
+                if rsd.udid != device_id:
+                    raise GeoPortError("The tunnel belongs to a different device.")
+            async with setup_step("Opening location simulation"):
+                dvt = await self._enter(stack, DvtProvider(rsd))
+                simulation = await self._enter(stack, LocationSimulation(dvt))
             yield DeviceConnection(
                 {
                     "id": device_id,

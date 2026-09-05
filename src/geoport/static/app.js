@@ -9,6 +9,7 @@ let bookmarks = [];
 let drawing = false;
 let selectedPoint = null;
 let map, selectedMarker, liveMarker, routeLayer;
+let routeNodes = [];
 
 function notice(message, error = false) {
   $('notice').textContent = message;
@@ -34,16 +35,30 @@ function updateControls() {
   $('device').disabled = busy || connected;
   for (const id of ['disconnect', 'restore', 'wifi']) $(id).disabled = busy || !connected;
   $('simulate').disabled = busy || !connected;
-  $('play').disabled = busy || !connected || playing || paused || !activeRoute()?.points?.length;
+  $('play').disabled = busy || !connected || playing || paused || (activeRoute()?.points.length || 0) < 2;
   $('pause').disabled = busy || !(playing || paused);
   $('pause').textContent = paused ? 'Resume' : 'Pause';
-  for (const id of ['draw', 'clear-route', 'routes', 'import', 'speed', 'custom-speed']) {
+  for (const id of ['draw', 'new-route', 'clear-route', 'add-node', 'undo-node', 'close-route', 'routes', 'import', 'speed', 'finish']) {
     $(id).disabled = busy || playing || paused;
   }
+  $('undo-node').disabled ||= !activeRoute()?.points.length;
+  $('close-route').disabled ||= (activeRoute()?.points.length || 0) < 2;
+  const closed = Boolean(activeRoute()?.closed);
+  $('finish').querySelector('[value="loop"]').disabled = !closed;
+  if (!closed && $('finish').value === 'loop') $('finish').value = 'stop';
+  for (const node of routeNodes) {
+    if (routeEditable()) node.dragging.enable(); else node.dragging.disable();
+  }
+  $('finish-hint').textContent = {
+    stop: 'Stops at the last node. Restore GPS clears simulation.',
+    loop: 'Follows the closing segment and repeats until you stop it.',
+    restart: 'Jumps from the last node to the first and repeats until stopped.',
+    reverse: 'Travels to the end, then reverses along the same nodes. Repeats until stopped.',
+  }[$('finish').value];
   $('refresh').disabled = busy;
   $('status').textContent = busy ? 'Working…' : {
     disconnected: 'Disconnected', connecting: 'Connecting…', ready: 'Ready',
-    simulating: 'Simulating', playing: 'Playing route', paused: 'Route paused', error: 'Connection lost',
+    simulating: 'Simulating', playing: 'Playing route', paused: 'Route paused', error: 'Device error',
   }[session.status] || session.status;
   $('status-dot').className = `status-dot ${connected ? 'active' : ''} ${session.error ? 'error' : ''}`;
   $('active-device').textContent = session.device
@@ -66,9 +81,9 @@ function applySession(result) {
     $('live-coordinates').textContent = '—';
   }
   if (result.playback) {
-    const { distance_m: distance, total_m: total, speed_kmh: speed } = result.playback;
+    const { distance_m: distance, total_m: total, speed_kmh: speed, direction, completed_legs: legs, finish } = result.playback;
     $('progress').value = distance / total;
-    $('playback-detail').textContent = `${(distance / 1000).toFixed(2)} / ${(total / 1000).toFixed(2)} km · ${speed} km/h`;
+    $('playback-detail').textContent = `${(distance / 1000).toFixed(2)} / ${(total / 1000).toFixed(2)} km · ${speed} km/h${finish !== 'stop' ? ` · ${direction} · ${legs} completed` : ''}`;
   } else {
     $('progress').value = 0;
     $('playback-detail').textContent = 'Playback continues while this tab is in the background.';
@@ -163,6 +178,20 @@ function choosePoint(point, pan = false) {
 }
 
 function activeRoute() { return routes[Number($('routes').value)]; }
+function routeEditable() { return !busy && !['playing', 'paused'].includes(session.status); }
+function routePoints(route) { return route.closed && route.points.length > 1 ? [...route.points, route.points[0]] : route.points; }
+function newRoute() {
+  routes.push({ name: `Route ${routes.length + 1}`, points: [], closed: false });
+  renderRouteOptions();
+  return activeRoute();
+}
+function addNode(point) {
+  if (!routeEditable()) return;
+  const route = activeRoute() || newRoute();
+  if (route.points.length >= 19999) { notice('A route can contain at most 19,999 editable nodes.', true); return; }
+  route.points.push([...point]);
+  renderRoute();
+}
 
 function renderRouteOptions(selected = routes.length - 1) {
   $('routes').replaceChildren();
@@ -176,18 +205,44 @@ function renderRoute(fit = false) {
   const route = activeRoute();
   if (map) {
     if (routeLayer) routeLayer.remove();
-    routeLayer = route ? L.polyline(route.points, { color: '#d86745', weight: 3 }).addTo(map) : null;
+    routeNodes.forEach((node) => node.remove());
+    routeNodes = [];
+    routeLayer = route ? L.polyline(routePoints(route), { color: '#0867b2', weight: 3 }).addTo(map) : null;
+    if (route) {
+      const indices = route.points.length <= 200
+        ? route.points.map((_, i) => i) : [0, route.points.length - 1];
+      for (const index of indices) {
+        const node = L.marker(route.points[index], {
+          draggable: routeEditable(), title: `Node ${index + 1}`,
+          icon: L.divIcon({ className: 'route-node', html: String(index + 1), iconSize: [26, 26], iconAnchor: [13, 13] }),
+        }).addTo(map);
+        node.on('click', () => {
+          if (drawing && index === 0 && route.points.length > 1 && routeEditable()) {
+            route.closed = true; finishDrawing();
+          } else choosePoint(route.points[index]);
+        });
+        node.on('dragend', () => {
+          if (routeEditable()) {
+            const point = node.getLatLng();
+            route.points[index] = [point.lat, ((point.lng + 180) % 360 + 360) % 360 - 180];
+          }
+          renderRoute();
+        });
+        routeNodes.push(node);
+      }
+    }
     if (fit && route?.points.length > 1) map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
   }
-  $('route-hint').textContent = drawing ? 'Click the map to add points. Choose Finish drawing when ready.'
-    : route ? `${route.points.length} points. Movement is interpolated between points.`
-      : 'Draw a route or import a GPX / GeoJSON file.';
+  $('close-route').checked = Boolean(route?.closed);
+  $('route-hint').textContent = drawing ? 'Click to connect nodes in order. Click node 1 to close the route, or Finish adding.'
+    : route ? `${route.points.length} nodes. ${route.points.length > 200 ? 'Large import: drag endpoints to edit.' : 'Drag numbered nodes to edit. Add nodes extends the route.'}`
+      : 'Add nodes on the map or import GPX / GeoJSON.';
   updateControls();
 }
 
 function finishDrawing() {
   drawing = false;
-  $('draw').textContent = 'Draw route';
+  $('draw').textContent = 'Add nodes';
   $('draw').classList.remove('drawing');
   renderRoute();
 }
@@ -206,7 +261,7 @@ function initializeMap() {
   map.on('click', ({ latlng }) => {
     const point = [latlng.lat, ((latlng.lng + 180) % 360 + 360) % 360 - 180];
     choosePoint(point);
-    if (drawing) { activeRoute().points.push(point); renderRoute(); }
+    if (drawing) addNode(point);
   });
 }
 
@@ -271,27 +326,43 @@ $('search-form').addEventListener('submit', async (event) => {
 
 $('draw').addEventListener('click', () => {
   if (drawing) { finishDrawing(); return; }
+  const route = activeRoute() || newRoute();
+  route.closed = false;
   drawing = true;
-  routes.push({ name: `Drawn route ${routes.length + 1}`, points: [] });
-  $('draw').textContent = 'Finish drawing';
+  $('draw').textContent = 'Finish adding';
   $('draw').classList.add('drawing');
-  renderRouteOptions();
+  renderRoute();
 });
+$('new-route').addEventListener('click', () => { finishDrawing(); newRoute(); });
+$('add-node').addEventListener('click', () => {
+  try { addNode(readPoint()); } catch (error) { notice(error.message, true); }
+});
+$('undo-node').addEventListener('click', () => {
+  const route = activeRoute();
+  if (!route) return;
+  route.points.pop();
+  if (route.points.length < 2) route.closed = false;
+  renderRoute();
+});
+$('close-route').addEventListener('change', () => {
+  if (activeRoute()) activeRoute().closed = $('close-route').checked;
+  finishDrawing();
+});
+$('finish').addEventListener('change', updateControls);
 $('clear-route').addEventListener('click', () => {
   if (routes.length) routes.splice(Number($('routes').value), 1);
   finishDrawing(); renderRouteOptions();
 });
 $('routes').addEventListener('change', () => { finishDrawing(); renderRoute(true); });
-$('speed').addEventListener('change', () => { $('custom-speed-label').hidden = $('speed').value !== 'custom'; });
 $('play').addEventListener('click', () => {
   const route = activeRoute();
   if (!route || route.points.length < 2) { notice('Add at least two route points.', true); return; }
-  const speed = Number($('speed').value === 'custom' ? $('custom-speed').value : $('speed').value);
+  const speed = Number($('speed').value);
   if (!Number.isFinite(speed) || speed <= 0 || speed > 999) {
     notice('Speed must be greater than 0 and no more than 999 km/h.', true); return;
   }
   finishDrawing();
-  command('/api/playback', { points: route.points, speed_kmh: speed }, 'POST', 'Route playing. Restore GPS stops playback and clears simulation.');
+  command('/api/playback', { points: routePoints(route), speed_kmh: speed, finish: $('finish').value }, 'POST', 'Route playing. Pause holds position; Restore GPS stops playback and clears simulation.');
 });
 $('pause').addEventListener('click', () => {
   const action = session.status === 'paused' ? 'resume' : 'pause';
@@ -306,7 +377,11 @@ $('import').addEventListener('change', async (event) => {
   try {
     const result = await api('/api/import', { method: 'POST', form });
     finishDrawing();
-    routes.push(...result.routes);
+    for (const route of result.routes) {
+      route.closed = route.points.length > 2 && route.points[0].every((n, i) => n === route.points.at(-1)[i]);
+      if (route.closed) route.points.pop();
+      routes.push(route);
+    }
     bookmarks.push(...result.markers);
     renderRouteOptions(); renderRoute(true);
     $('bookmarks').replaceChildren();
@@ -326,7 +401,7 @@ $('export').addEventListener('click', () => {
   if (selectedPoint) points.push({ name: 'Selected location', point: selectedPoint });
   const features = [
     ...routes.filter((r) => r.points.length >= 2).map((r) => ({ type: 'Feature', properties: { name: r.name },
-      geometry: { type: 'LineString', coordinates: r.points.map(([lat, lon]) => [lon, lat]) } })),
+      geometry: { type: 'LineString', coordinates: routePoints(r).map(([lat, lon]) => [lon, lat]) } })),
     ...points.map((m) => ({ type: 'Feature', properties: { name: m.name },
       geometry: { type: 'Point', coordinates: [m.point[1], m.point[0]] } })),
   ];

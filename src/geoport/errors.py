@@ -1,5 +1,7 @@
 """Errors shared by HTTP handlers and the device worker."""
 
+from html import unescape
+
 
 class GeoPortError(Exception):
     def __init__(self, message: str, code: str = "invalid_request", status: int = 400):
@@ -52,8 +54,10 @@ def device_error(exc: Exception) -> GeoPortError:
             "developer_service_unavailable",
             503,
         )
+    detail = " ".join(unescape(str(exc)).split())[:600]
+    reason = f" {detail}" if detail else " The device did not supply an error description."
     return GeoPortError(
-        f"Device communication failed ({name}). Check the connection and reconnect. "
+        f"Device communication failed ({name}).{reason} Check the connection and reconnect. "
         "If a simulated location remains, reconnect and select Restore GPS.",
         "device_unavailable",
         503,

@@ -75,3 +75,6 @@ body.dark #notice.error { color: #ff8c8c; }
   aside { overflow: visible; border-right: 0; }
   .status-strip > span:last-child { max-width: 50%; }
 }
+.checkbox { display: flex; align-items: center; gap: 6px; margin: 8px 0; }
+.checkbox input { width: auto; min-height: 0; margin: 0; }
+.route-node { border: 1px solid #0867b2; border-radius: 50%; background: #fff; color: #202124; text-align: center; line-height: 24px; font: 12px/24px system-ui, sans-serif; cursor: grab; }

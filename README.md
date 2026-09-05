@@ -9,7 +9,8 @@ Simulate your iPhone's location and routes from a simple map interface.
 ## Key Features
 
 - Set a location using the map, place search, or coordinates.
-- Draw routes or import GPX/GeoJSON, choose a speed, and pause or resume movement.
+- Connect and drag numbered route nodes, or import GPX/GeoJSON. Enter a speed in km/h and pause or resume movement.
+- On route finish, stop, loop a connected route, restart from the beginning, or travel back and forth indefinitely.
 - Connect over USB or supported local Wi-Fi connections.
 - Explore Australian fuel prices with Fuel Mode.
 - Restore GPS when you're finished.
@@ -33,6 +34,9 @@ Simulate your iPhone's location and routes from a simple map interface.
 - For Wi-Fi, pair over USB and enable Wi-Fi connections first. Disconnect, unplug, then reconnect on the same local network. The computer must stay running and reachable.
 - Location persistence after disconnection is not guaranteed. If simulation remains active, reconnect and use **Restore GPS**.
 - Routes follow the points you supply; automatic road routing is not included. Map tiles, place searches, and optional fuel prices need their online providers.
+- **Add nodes** connects map clicks in order. Drag nodes to move them, or use **Add coordinates**. Click the first node while adding, or check **Connect last node to first**, to close a loop. Imports over 200 nodes show draggable endpoints only.
+- **Loop** follows the closing segment continuously. **Restart** jumps back to the beginning. **Reverse** retraces the route. These modes repeat until paused or stopped with **Restore GPS**.
+- If Connect fails, the page and console report the setup step and error detail. Include that full message when reporting the problem.
 
 ## Run From Source
 
