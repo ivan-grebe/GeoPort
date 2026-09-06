@@ -1,6 +1,7 @@
 # GeoPort
 
 Simulate an iPhone's location and routes from a local browser interface. Fork of [davesc63/GeoPort](https://github.com/davesc63/GeoPort).
+Verified working on iOS 27.
 
 [Downloads](https://github.com/ivan-grebe/GeoPort/releases)
 
