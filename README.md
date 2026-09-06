@@ -30,10 +30,10 @@ Simulate an iPhone's location and routes from a local browser interface. Fork of
 4. Choose a location and click **Simulate location**, or add route nodes and start playback.
 5. Use **Restore GPS** when finished. **Ctrl+C** in the console restores GPS and exits.
 
-## Tech Stuff and Recognition
+## Tech Stuff
 
-- [davesc63/GeoPort](https://github.com/davesc63/GeoPort) — original project ([support Dave](https://www.buymeacoffee.com/davesc63)).
-- [pymobiledevice3](https://github.com/doronz88/pymobiledevice3) — device communication and location simulation.
+- [davesc63/GeoPort](https://github.com/davesc63/GeoPort) - original project
+- [pymobiledevice3](https://github.com/doronz88/pymobiledevice3) - device communication and location simulation
 
 ### Run From Source
 
