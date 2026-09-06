@@ -1,12 +1,11 @@
 # GeoPort
+Simulate an iPhone's location and routes from a local browser interface. Verified working on iOS 27.
 
-Simulate an iPhone's location and routes from a local browser interface. Fork of [davesc63/GeoPort](https://github.com/davesc63/GeoPort). Verified working on iOS 27.
-
-[Downloads](https://github.com/ivan-grebe/GeoPort/releases)
+[Download here](https://github.com/ivan-grebe/GeoPort/releases)
 
 > [!WARNING]
-> On newer iOS versions, the real location may be restored after unplugging or losing the connection.
-
+> On newer iOS versions, the real location may be restored after unplugging or losing the connection. One workaround may be disabling iOS developer mode before disconnecting.
+> 
 ## Features
 
 - Set a location using the map, search, or coordinates; restore real GPS when finished.
