@@ -30,6 +30,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $releaseOptions = @()
-          if ($env:GITHUB_REF_NAME.Contains('-')) { $releaseOptions += '--prerelease' }
-          gh release create $env:GITHUB_REF_NAME dist/GeoPort.exe --verify-tag --title "GeoPort $env:GITHUB_REF_NAME" --generate-notes @releaseOptions
+          gh release create $env:GITHUB_REF_NAME dist/GeoPort.exe --verify-tag --title "GeoPort $env:GITHUB_REF_NAME" --generate-notes --latest
