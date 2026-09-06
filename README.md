@@ -1,10 +1,11 @@
 # GeoPort
 
-Simulate an iPhone's location and routes from a local browser interface. Fork of [davesc63/GeoPort](https://github.com/davesc63/GeoPort).
-
-Verified working on iOS 27.
+Simulate an iPhone's location and routes from a local browser interface. Fork of [davesc63/GeoPort](https://github.com/davesc63/GeoPort). Verified working on iOS 27.
 
 [Downloads](https://github.com/ivan-grebe/GeoPort/releases)
+
+> [!WARNING]
+> On newer iOS versions, the real location may be restored after unplugging or losing the connection.
 
 ## Features
 
@@ -14,13 +15,11 @@ Verified working on iOS 27.
 - Import GPX/GeoJSON and export GeoJSON. Routes follow straight segments between nodes.
 - USB and local Wi-Fi connections; Australian fuel prices with state filtering.
 
-![GeoPort](images/geoport.png)
-
 ## Requirements
 
-- iOS 17.4+ with **Settings → Privacy & Security → Developer Mode** enabled. Complete the restart and confirmation; keep your passcode enabled.
-- If Developer Mode is hidden, connect over USB and click **Connect** in GeoPort to reveal it.
 - Windows with Apple Devices or iTunes installed.
+- iOS 17.4+ with **Settings → Privacy & Security → Developer Mode** enabled. Complete the restart and confirmation.
+  - If Developer Mode is hidden, connect over USB and click **Connect** in GeoPort to reveal it.
 - Internet access for initial developer image setup, maps, search, and fuel prices.
 
 ## Installation
@@ -31,24 +30,10 @@ Verified working on iOS 27.
 4. Choose a location and click **Simulate location**, or add route nodes and start playback.
 5. Use **Restore GPS** when finished. **Ctrl+C** in the console restores GPS and exits.
 
-## App Notes
-
-- Keep GeoPort running on the computer. Closing the browser tab does not stop it.
-- **Stop** ends route playback and unlocks editing, holding the last location. **Restore GPS** returns to the real location.
-- Wi-Fi requires prior pairing and wireless connections already enabled on the device. The phone and computer must share a local network.
-- iOS may restore the real location after unplugging or losing the connection ([#190](https://github.com/davesc63/GeoPort/issues/190)); disconnected simulation is not guaranteed. If simulation remains, reconnect and use **Restore GPS**.
-- The EXE is unsigned. USB connection was tested and location simulation confirmed by a user on an iPhone 13 Pro with iOS 27 beta; physical route playback and Wi-Fi remain unverified.
-
 ## Tech Stuff and Recognition
-
-Python, Flask, and Waitress serve the local interface and run route playback on the computer.
 
 - [davesc63/GeoPort](https://github.com/davesc63/GeoPort) — original project ([support Dave](https://www.buymeacoffee.com/davesc63)).
 - [pymobiledevice3](https://github.com/doronz88/pymobiledevice3) — device communication and location simulation.
-- [iFakeLocation](https://github.com/master131/iFakeLocation) — original GeoPort's interface inspiration.
-- [Leaflet](https://leafletjs.com/) and [OpenStreetMap contributors](https://www.openstreetmap.org/copyright) — maps; Nominatim provides place search.
-- [GeographicLib](https://geographiclib.sourceforge.io/) and [gpxpy](https://github.com/tkrajina/gpxpy) — route interpolation and GPX parsing.
-- [Project Zero Three](https://projectzerothree.info/) — Australian fuel prices.
 
 ### Run From Source
 
